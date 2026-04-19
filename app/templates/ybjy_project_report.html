@@ -1,0 +1,61 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">项目概览</p>
+            <h1>{{ project_info.project_name }}</h1>
+            <p class="ybjy-heading-note">查看样本数量、格式分布、特征状态和操作核对清单。</p>
+        </div>
+        <div class="ybjy-action-row">
+            <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_project_detail', project_id=project_info.id) }}">返回项目</a>
+            <a class="btn btn-primary" href="{{ url_for('ybjy_export_inventory', project_id=project_info.id) }}">导出样本清单</a>
+        </div>
+    </div>
+
+    <div class="ybjy-report-grid">
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">数据概况</div>
+            <div class="ybjy-report-stat"><span>图片样本</span><strong>{{ overview.sample_count }}</strong></div>
+            <div class="ybjy-report-stat"><span>反馈记录</span><strong>{{ overview.feedback_count }}</strong></div>
+            <div class="ybjy-report-stat"><span>特征数量</span><strong>{{ overview.feature_summary.feature_count }}</strong></div>
+            <div class="ybjy-report-stat"><span>特征维度</span><strong>{{ overview.feature_summary.feature_dim }}</strong></div>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">文件格式</div>
+            {% for item in overview.extension_summary %}
+            <div class="ybjy-report-line"><span>{{ item.extension }}</span><strong>{{ item.count }}</strong></div>
+            {% else %}
+            <p class="ybjy-panel-note">当前项目暂无图片样本。</p>
+            {% endfor %}
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">人工校正</div>
+            <div class="ybjy-report-line"><span>保留结果</span><strong>{{ overview.feedback_summary.positive_count }}</strong></div>
+            <div class="ybjy-report-line"><span>降低结果</span><strong>{{ overview.feedback_summary.negative_count }}</strong></div>
+            <div class="ybjy-report-line"><span>文字查询反馈</span><strong>{{ overview.feedback_summary.text_count }}</strong></div>
+            <div class="ybjy-report-line"><span>图片查询反馈</span><strong>{{ overview.feedback_summary.image_count }}</strong></div>
+        </section>
+    </div>
+
+    <section class="ybjy-panel mt-3">
+        <div class="ybjy-panel-title">操作核对清单</div>
+        <div class="ybjy-check-table">
+            {% for row in checklist_rows %}
+            <div class="ybjy-check-row">
+                <strong>{{ row.name }}</strong>
+                <span>{{ row.status }}</span>
+                <p>{{ row.note }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="ybjy-panel mt-3">
+        <div class="ybjy-panel-title">项目报告文本</div>
+        <pre class="ybjy-report-text">{{ report_text }}</pre>
+    </section>
+</section>
+{% endblock %}

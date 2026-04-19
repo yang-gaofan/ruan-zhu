@@ -1,0 +1,95 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">使用说明</p>
+            <h1>样本语检系统操作流程</h1>
+            <p class="ybjy-heading-note">本页面说明系统主要功能、推荐操作顺序和常见检查点。</p>
+        </div>
+        <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_home') }}">返回首页</a>
+    </div>
+
+    <div class="ybjy-help-grid">
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">一、创建项目</div>
+            <p class="ybjy-panel-note">在首页填写项目名称和项目备注。项目名称建议体现样本来源或整理目的，例如“校园植物样本整理”“鸟类图片样本检索”。</p>
+            <ul class="ybjy-help-list">
+                <li>项目名称不能为空。</li>
+                <li>项目备注可以记录数据来源、用途和整理范围。</li>
+                <li>每个项目的数据互相独立，便于分别导出和复核。</li>
+            </ul>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">二、导入图片</div>
+            <p class="ybjy-panel-note">进入项目详情后，选择一张或多张图片上传。系统会保存图片文件并生成本地检索特征。</p>
+            <ul class="ybjy-help-list">
+                <li>支持 JPG、JPEG、PNG、BMP、WEBP 格式。</li>
+                <li>单次上传文件总量受系统上传大小限制。</li>
+                <li>导入后可以在样本列表中查看缩略图和文件名称。</li>
+            </ul>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">三、文字检索</div>
+            <p class="ybjy-panel-note">在文字检索页面输入中文或英文描述，系统会返回语义相近的图片样本。</p>
+            <ul class="ybjy-help-list">
+                <li>检索词可以是物体、颜色、场景或简短描述。</li>
+                <li>返回数量可在 1 到 50 之间调整。</li>
+                <li>结果会显示原始分数、校正分值和最终分数。</li>
+            </ul>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">四、图片检索</div>
+            <p class="ybjy-panel-note">在图片检索页面选择一张已导入图片，系统会查找同项目内相似的其他图片。</p>
+            <ul class="ybjy-help-list">
+                <li>建议项目中至少有两张图片再使用该功能。</li>
+                <li>查询图片不会出现在自己的相似结果里。</li>
+                <li>该功能适合查找重复、近似或同类图片。</li>
+            </ul>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">五、人工校正</div>
+            <p class="ybjy-panel-note">在检索结果中可以点击“保留结果”或“降低结果”，系统会保存本次人工判断。</p>
+            <ul class="ybjy-help-list">
+                <li>保留结果会让同一查询下该样本排序略微上升。</li>
+                <li>降低结果会让同一查询下该样本排序略微下降。</li>
+                <li>该功能用于项目内结果整理，不改变模型权重。</li>
+            </ul>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">六、样本检查</div>
+            <p class="ybjy-panel-note">样本检查页面会列出文件状态、图片尺寸、文件大小、格式和特征长度。</p>
+            <ul class="ybjy-help-list">
+                <li>如果文件缺失，需要重新导入图片。</li>
+                <li>如果图片不可读，需要检查图片是否损坏。</li>
+                <li>如果特征长度异常，可以删除样本后重新上传。</li>
+            </ul>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">七、项目概览</div>
+            <p class="ybjy-panel-note">项目概览页面汇总样本数量、格式分布、反馈统计和操作核对清单。</p>
+            <ul class="ybjy-help-list">
+                <li>用于快速确认项目是否已经形成完整数据闭环。</li>
+                <li>可以复制项目报告文本，作为整理记录的基础材料。</li>
+                <li>可以导出样本清单，便于线下核对。</li>
+            </ul>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">八、结果导出</div>
+            <p class="ybjy-panel-note">导出中心支持输出文字检索结果、图片检索结果、反馈记录、样本清单和样本检查清单。</p>
+            <ul class="ybjy-help-list">
+                <li>导出的文件采用 CSV 格式，便于表格软件打开。</li>
+                <li>导出内容与当前项目绑定，不会混入其他项目数据。</li>
+                <li>导出前建议先完成样本检查，减少无效记录。</li>
+            </ul>
+        </section>
+    </div>
+</section>
+{% endblock %}

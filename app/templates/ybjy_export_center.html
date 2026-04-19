@@ -1,0 +1,63 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">导出中心</p>
+            <h1>{{ project_info.project_name }}</h1>
+            <p class="ybjy-heading-note">导出检索结果、相似样本结果和人工校正记录。</p>
+        </div>
+        <div class="ybjy-action-row">
+            <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_project_detail', project_id=project_info.id) }}">返回项目</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_project_report', project_id=project_info.id) }}">项目概览</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_sample_inspection', project_id=project_info.id) }}">样本检查</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_function_description', project_id=project_info.id) }}">主功能说明</a>
+        </div>
+    </div>
+
+    <div class="ybjy-export-grid">
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">文字检索结果</div>
+            <p class="ybjy-panel-note">输入检索文字后，导出当前项目下的语义检索排序结果。</p>
+            <form method="post" action="{{ url_for('ybjy_export_text_result', project_id=project_info.id) }}">
+                <label class="form-label">检索文字</label>
+                <input type="text" class="form-control mb-3" name="query_text" placeholder="输入要导出的检索词" required>
+                <button type="submit" class="btn btn-primary w-100">生成 CSV 文件</button>
+            </form>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">图片检索结果</div>
+            <p class="ybjy-panel-note">选择一张查询图片，导出相似图片的排序结果。</p>
+            <form method="post" action="{{ url_for('ybjy_export_image_result', project_id=project_info.id) }}">
+                <label class="form-label">查询图片</label>
+                <select class="form-select mb-3" name="source_sample_id" required>
+                    <option value="0">请选择一张已导入图片</option>
+                    {% for row in sample_rows %}
+                    <option value="{{ row.id }}">{{ row.file_name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary w-100">生成 CSV 文件</button>
+            </form>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">人工校正记录</div>
+            <p class="ybjy-panel-note">导出当前项目内所有保留结果和降低结果的操作记录。</p>
+            <a class="btn btn-primary w-100" href="{{ url_for('ybjy_export_feedback', project_id=project_info.id) }}">生成 CSV 文件</a>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">样本清单</div>
+            <p class="ybjy-panel-note">导出样本编号、文件名称、路径、导入时间和特征长度。</p>
+            <a class="btn btn-primary w-100" href="{{ url_for('ybjy_export_inventory', project_id=project_info.id) }}">生成 CSV 文件</a>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">样本检查清单</div>
+            <p class="ybjy-panel-note">导出图片尺寸、文件大小、格式、特征长度和状态信息。</p>
+            <a class="btn btn-primary w-100" href="{{ url_for('ybjy_export_sample_inspection', project_id=project_info.id) }}">生成 CSV 文件</a>
+        </section>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">材料文本</p>
+            <h1>主功能说明</h1>
+            <p class="ybjy-heading-note">以下内容与当前系统实现保持一致，可作为申报材料初稿继续人工调整。</p>
+        </div>
+        <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_export_center', project_id=project_info.id) }}">返回导出中心</a>
+    </div>
+    <article class="ybjy-text-block">{{ function_text }}</article>
+</section>
+{% endblock %}

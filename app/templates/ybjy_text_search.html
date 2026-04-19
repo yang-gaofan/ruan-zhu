@@ -1,0 +1,65 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">文字检索图片</p>
+            <h1>{{ project_info.project_name }}</h1>
+            <p class="ybjy-heading-note">输入中文或英文描述，系统返回语义相近的图片样本。</p>
+        </div>
+        <div class="ybjy-action-row">
+            <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_project_detail', project_id=project_info.id) }}">返回项目</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_export_center', project_id=project_info.id) }}">导出中心</a>
+        </div>
+    </div>
+
+    <section class="ybjy-panel">
+        <form method="post" class="ybjy-search-form">
+            <div>
+                <label class="form-label">检索文字</label>
+                <input type="text" class="form-control" name="query_text" value="{{ query_text }}" placeholder="例如：红色汽车、花朵、建筑、dog、cat" required>
+            </div>
+            <div>
+                <label class="form-label">返回数量</label>
+                <input type="number" class="form-control" name="top_k" value="{{ top_k }}" min="1" max="50" data-ybjy-number>
+            </div>
+            <button class="btn btn-primary" type="submit">开始检索</button>
+        </form>
+    </section>
+
+    <div class="ybjy-result-grid">
+        {% for row in result_rows %}
+        <article class="ybjy-result-item">
+            <img class="ybjy-thumb" src="{{ url_for('ybjy_uploaded_file', relative_path=row.relative_path) }}" alt="{{ row.file_name }}">
+            <div class="ybjy-result-body">
+                <h3 title="{{ row.file_name }}">{{ row.file_name }}</h3>
+                <div class="ybjy-score-row"><span>原始分数</span><strong>{{ row.raw_score }}</strong></div>
+                <div class="ybjy-score-row"><span>校正分值</span><strong>{{ row.feedback_bonus }}</strong></div>
+                <div class="ybjy-score-row"><span>最终分数</span><strong>{{ row.final_score }}</strong></div>
+                <div class="ybjy-feedback-row">
+                    <form method="post" action="{{ url_for('ybjy_feedback_save', project_id=project_info.id) }}">
+                        <input type="hidden" name="target_sample_id" value="{{ row.id }}">
+                        <input type="hidden" name="query_type" value="text">
+                        <input type="hidden" name="query_value" value="{{ query_text }}">
+                        <input type="hidden" name="feedback_value" value="1">
+                        <button type="submit" class="btn btn-success btn-sm w-100">保留结果</button>
+                    </form>
+                    <form method="post" action="{{ url_for('ybjy_feedback_save', project_id=project_info.id) }}">
+                        <input type="hidden" name="target_sample_id" value="{{ row.id }}">
+                        <input type="hidden" name="query_type" value="text">
+                        <input type="hidden" name="query_value" value="{{ query_text }}">
+                        <input type="hidden" name="feedback_value" value="-1">
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">降低结果</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+        {% else %}
+        <div class="ybjy-empty">
+            <strong>等待检索</strong>
+            <span>输入检索文字后，结果会显示在这里。</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

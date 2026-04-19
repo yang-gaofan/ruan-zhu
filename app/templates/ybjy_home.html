@@ -1,0 +1,75 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">项目管理</p>
+            <h1>图像样本项目</h1>
+            <p class="ybjy-heading-note">先建立项目，再导入图片样本并执行语义检索。</p>
+        </div>
+        <div class="ybjy-status-grid">
+            <div class="ybjy-status-tile">
+                <span>项目数</span>
+                <strong>{{ total_project_count }}</strong>
+            </div>
+            <div class="ybjy-status-tile">
+                <span>样本数</span>
+                <strong>{{ total_sample_count }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <section class="ybjy-panel">
+                <div class="ybjy-panel-title">创建项目</div>
+                <form method="post" action="{{ url_for('ybjy_project_create') }}" class="ybjy-form">
+                    <div class="mb-3">
+                        <label class="form-label">项目名称</label>
+                        <input type="text" class="form-control" name="project_name" placeholder="例如：细粒度鸟类图片整理" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">项目备注</label>
+                        <textarea class="form-control" name="project_note" rows="5" placeholder="记录样本来源、用途或整理范围"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">创建项目并进入</button>
+                </form>
+            </section>
+        </div>
+
+        <div class="col-lg-8">
+            <section class="ybjy-section-head">
+                <div>
+                    <h2>项目列表</h2>
+                    <p>每个项目独立保存图片、特征、反馈记录和导出文件。</p>
+                </div>
+            </section>
+
+            <div class="row g-3">
+                {% for row in project_rows %}
+                <div class="col-md-6">
+                    <article class="ybjy-project-item">
+                        <div class="ybjy-project-main">
+                            <h3 title="{{ row.project_name }}">{{ row.project_name }}</h3>
+                            <p>{{ row.project_note or '暂无项目备注' }}</p>
+                        </div>
+                        <div class="ybjy-project-meta">
+                            <span>样本 {{ row.sample_count }}</span>
+                            <span>{{ row.created_at }}</span>
+                        </div>
+                        <a class="btn btn-outline-primary w-100" href="{{ url_for('ybjy_project_detail', project_id=row.id) }}">进入项目</a>
+                    </article>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="ybjy-empty">
+                        <strong>还没有项目</strong>
+                        <span>从左侧创建一个项目后，就可以导入图片样本。</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

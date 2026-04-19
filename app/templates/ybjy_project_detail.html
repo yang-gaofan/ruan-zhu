@@ -1,0 +1,58 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">项目详情</p>
+            <h1>{{ project_info.project_name }}</h1>
+            <p class="ybjy-heading-note">{{ project_info.project_note or '暂无项目备注' }}</p>
+        </div>
+        <div class="ybjy-action-row">
+            <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_home') }}">返回首页</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_project_report', project_id=project_info.id) }}">项目概览</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_sample_inspection', project_id=project_info.id) }}">样本检查</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_text_search', project_id=project_info.id) }}">文字检索</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_image_search', project_id=project_info.id) }}">图片检索</a>
+            <a class="btn btn-primary" href="{{ url_for('ybjy_export_center', project_id=project_info.id) }}">导出中心</a>
+        </div>
+    </div>
+
+    <section class="ybjy-panel ybjy-upload-panel">
+        <div class="ybjy-panel-title">导入图片样本</div>
+        <p class="ybjy-panel-note">支持 JPG、PNG、BMP、WEBP。导入后会保存图片并生成本地检索特征。</p>
+        <form method="post" action="{{ url_for('ybjy_upload_sample', project_id=project_info.id) }}" enctype="multipart/form-data" class="ybjy-upload-form">
+            <input class="form-control" type="file" name="sample_files" accept=".jpg,.jpeg,.png,.bmp,.webp" multiple required data-ybjy-file-input>
+            <button type="submit" class="btn btn-primary">开始导入</button>
+        </form>
+        <div class="ybjy-file-hint" data-ybjy-file-hint>尚未选择文件</div>
+        <div class="ybjy-preview-strip" data-ybjy-preview-strip></div>
+    </section>
+
+    <section class="ybjy-section-head">
+        <div>
+            <h2>样本列表</h2>
+            <p>当前项目共 {{ sample_count }} 张图片。</p>
+        </div>
+    </section>
+
+    <div class="ybjy-sample-grid">
+        {% for row in sample_rows %}
+        <article class="ybjy-sample-item">
+            <img class="ybjy-thumb" src="{{ url_for('ybjy_uploaded_file', relative_path=row.relative_path) }}" alt="{{ row.file_name }}">
+            <div class="ybjy-sample-body">
+                <h3 title="{{ row.file_name }}">{{ row.file_name }}</h3>
+                <p>导入时间：{{ row.created_at }}</p>
+                <form method="post" action="{{ url_for('ybjy_delete_sample', sample_id=row.id) }}" data-ybjy-confirm="确认删除这个样本吗？">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">删除样本</button>
+                </form>
+            </div>
+        </article>
+        {% else %}
+        <div class="ybjy-empty">
+            <strong>当前项目还没有样本</strong>
+            <span>先上传图片，再进行文字检索或图片检索。</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

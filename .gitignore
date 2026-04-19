@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.tmp
+*.log
+*.db-journal
+runtime_data/database/*.db-journal
+runtime_data/exports/
+runtime_data/uploads/
+runtime_data/cache/
+.venv/
+.pytest_cache/

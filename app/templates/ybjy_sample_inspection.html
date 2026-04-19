@@ -1,0 +1,71 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">样本检查</p>
+            <h1>{{ project_info.project_name }}</h1>
+            <p class="ybjy-heading-note">检查图片文件、尺寸、格式、特征长度和本地存储状态。</p>
+        </div>
+        <div class="ybjy-action-row">
+            <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_project_detail', project_id=project_info.id) }}">返回项目</a>
+            <a class="btn btn-primary" href="{{ url_for('ybjy_export_sample_inspection', project_id=project_info.id) }}">导出检查清单</a>
+        </div>
+    </div>
+
+    <div class="ybjy-inspection-summary">
+        <section class="ybjy-panel">
+            <div class="ybjy-report-stat"><span>样本总数</span><strong>{{ summary.total_count }}</strong></div>
+            <div class="ybjy-report-stat"><span>文件存在</span><strong>{{ summary.existing_count }}</strong></div>
+        </section>
+        <section class="ybjy-panel">
+            <div class="ybjy-report-stat"><span>图片可读</span><strong>{{ summary.readable_count }}</strong></div>
+            <div class="ybjy-report-stat"><span>异常记录</span><strong>{{ summary.abnormal_count }}</strong></div>
+        </section>
+        <section class="ybjy-panel">
+            <div class="ybjy-report-stat"><span>文件缺失</span><strong>{{ summary.missing_count }}</strong></div>
+            <div class="ybjy-report-stat"><span>占用空间</span><strong>{{ summary.total_size_text }}</strong></div>
+        </section>
+    </div>
+
+    <section class="ybjy-panel mt-3">
+        <div class="ybjy-panel-title">检查明细</div>
+        <div class="ybjy-table-toolbar">
+            <input type="search" class="form-control" placeholder="按文件名或状态筛选" data-ybjy-table-filter>
+            <span data-ybjy-table-count>共 {{ inspection_rows|length }} 条记录</span>
+        </div>
+        <div class="ybjy-table-wrap">
+            <table class="table ybjy-data-table" data-ybjy-table>
+                <thead>
+                <tr data-ybjy-table-row>
+                    <th data-ybjy-sort="text">文件名称</th>
+                    <th data-ybjy-sort="text">状态</th>
+                    <th data-ybjy-sort="text">大小</th>
+                    <th data-ybjy-sort="text">尺寸</th>
+                    <th data-ybjy-sort="text">格式</th>
+                    <th data-ybjy-sort="number">特征长度</th>
+                    <th data-ybjy-sort="text">导入时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in inspection_rows %}
+                <tr>
+                    <td title="{{ row.file_name }}">{{ row.file_name }}</td>
+                    <td><span class="ybjy-status-pill">{{ row.status_text }}</span></td>
+                    <td>{{ row.file_size_text }}</td>
+                    <td>{{ row.image_width }} × {{ row.image_height }}</td>
+                    <td>{{ row.image_format or row.extension }}</td>
+                    <td>{{ row.feature_length }}</td>
+                    <td>{{ row.created_at }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7">当前项目暂无样本。</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</section>
+{% endblock %}
