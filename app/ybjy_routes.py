@@ -16,6 +16,7 @@ from app.ybjy_business_service import (
 from app.ybjy_clip_service import frozen_ybjy_clip_service
 from app.ybjy_database import (
     create_ybjy_project,
+    delete_ybjy_project,
     delete_ybjy_sample,
     get_ybjy_project,
     get_ybjy_sample,
@@ -34,6 +35,11 @@ from app.ybjy_sample_inspection_service import (
     build_ybjy_inspection_page_data,
     export_ybjy_sample_inspection_csv,
 )
+from app.ybjy_representation_service import (
+    build_ybjy_representation_lab_data,
+    export_ybjy_representation_experiments_csv,
+    run_ybjy_projection_head_training,
+)
 
 
 def _read_ybjy_positive_int(form_name, default_value, max_value=50):
@@ -43,6 +49,15 @@ def _read_ybjy_positive_int(form_name, default_value, max_value=50):
     except ValueError:
         return default_value
     return max(1, min(number_value, max_value))
+
+
+def _read_ybjy_float(form_name, default_value, min_value, max_value):
+    raw_value = request.form.get(form_name, str(default_value)).strip()
+    try:
+        number_value = float(raw_value)
+    except ValueError:
+        return default_value
+    return max(min_value, min(number_value, max_value))
 
 
 def register_yangben_yujian_routes(app):
@@ -79,6 +94,16 @@ def register_yangben_yujian_routes(app):
         project_id = create_ybjy_project(project_name, project_note)
         flash('项目创建成功，可以开始导入图片样本。')
         return redirect(url_for('ybjy_project_detail', project_id=project_id))
+
+    @app.route('/project/<int:project_id>/delete', methods=['POST'])
+    def ybjy_project_delete(project_id):
+        project_info = get_ybjy_project(project_id)
+        if not project_info:
+            flash('项目不存在。')
+            return redirect(url_for('ybjy_home'))
+        delete_ybjy_project(project_id)
+        flash('项目已删除。')
+        return redirect(url_for('ybjy_home'))
 
     @app.route('/project/<int:project_id>')
     def ybjy_project_detail(project_id):
@@ -278,6 +303,41 @@ def register_yangben_yujian_routes(app):
             return redirect(url_for('ybjy_home'))
 
         export_name = export_ybjy_sample_inspection_csv(project_info)
+        return send_from_directory(EXPORT_DIR, export_name, as_attachment=True)
+
+    @app.route('/project/<int:project_id>/representation-lab', methods=['GET', 'POST'])
+    def ybjy_representation_lab(project_id):
+        project_info = get_ybjy_project(project_id)
+        if not project_info:
+            flash('项目不存在。')
+            return redirect(url_for('ybjy_home'))
+
+        queue_size = _read_ybjy_positive_int('queue_size', 64, max_value=4096)
+        if request.method == 'POST':
+            train_options = {
+                'experiment_name': request.form.get('experiment_name', '').strip() or '图像特征对比训练记录',
+                'queue_size': queue_size,
+                'projection_dim': _read_ybjy_positive_int('projection_dim', 128, max_value=1024),
+                'epoch_count': _read_ybjy_positive_int('epoch_count', 12, max_value=100),
+                'learning_rate': _read_ybjy_float('learning_rate', 0.001, 0.00001, 0.1),
+                'temperature_value': _read_ybjy_float('temperature_value', 0.2, 0.03, 1.0),
+                'noise_scale': _read_ybjy_float('noise_scale', 0.03, 0.0, 0.2),
+            }
+            train_result = run_ybjy_projection_head_training(project_id, train_options)
+            flash(train_result['message'])
+            return redirect(url_for('ybjy_representation_lab', project_id=project_id))
+
+        page_data = build_ybjy_representation_lab_data(project_info, queue_size)
+        return render_template('ybjy_representation_lab.html', **page_data)
+
+    @app.route('/project/<int:project_id>/export-representation-experiments')
+    def ybjy_export_representation_experiments(project_id):
+        project_info = get_ybjy_project(project_id)
+        if not project_info:
+            flash('项目不存在。')
+            return redirect(url_for('ybjy_home'))
+
+        export_name = export_ybjy_representation_experiments_csv(project_info)
         return send_from_directory(EXPORT_DIR, export_name, as_attachment=True)
 
     @app.route('/project/<int:project_id>/export-text-result', methods=['POST'])

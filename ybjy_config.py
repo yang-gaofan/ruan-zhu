@@ -3,8 +3,8 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent
 
-APP_TITLE = '轻量化图像样本语义管理与检索系统 V1.0'
-APP_SHORT_NAME = '样本语检系统'
+APP_TITLE = '基于冻结 CLIP 与动量对比学习的图像表征训练与检索系统 V1.0'
+APP_SHORT_NAME = '图像表征训检系统'
 SECRET_KEY = 'ybjy-system-secret-key-2026'
 
 DATA_DIR = BASE_DIR / 'runtime_data'

@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime
@@ -63,6 +64,27 @@ def initialize_yangben_yujian_database():
                 created_at TEXT NOT NULL,
                 FOREIGN KEY(project_id) REFERENCES ybjy_project(id),
                 FOREIGN KEY(target_sample_id) REFERENCES ybjy_sample(id)
+            )
+            '''
+        )
+        cursor.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS ybjy_feature_experiment (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id INTEGER NOT NULL,
+                experiment_name TEXT NOT NULL,
+                queue_size INTEGER NOT NULL,
+                projection_dim INTEGER NOT NULL,
+                epoch_count INTEGER NOT NULL,
+                learning_rate REAL NOT NULL,
+                temperature_value REAL NOT NULL,
+                sample_count INTEGER NOT NULL,
+                final_loss REAL NOT NULL,
+                device_name TEXT NOT NULL,
+                status_text TEXT NOT NULL,
+                metric_json TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(project_id) REFERENCES ybjy_project(id)
             )
             '''
         )
@@ -148,6 +170,22 @@ def delete_ybjy_sample(sample_id):
     return True
 
 
+def delete_ybjy_project(project_id):
+    project_record = get_ybjy_project(project_id)
+    if not project_record:
+        return False
+    project_folder = Path(UPLOAD_DIR) / f'project_{project_id}'
+    if project_folder.exists():
+        shutil.rmtree(project_folder)
+    with open_yangben_yujian_db() as connection:
+        cursor = connection.cursor()
+        cursor.execute('DELETE FROM ybjy_feature_experiment WHERE project_id = ?', (project_id,))
+        cursor.execute('DELETE FROM ybjy_feedback WHERE project_id = ?', (project_id,))
+        cursor.execute('DELETE FROM ybjy_sample WHERE project_id = ?', (project_id,))
+        cursor.execute('DELETE FROM ybjy_project WHERE id = ?', (project_id,))
+    return True
+
+
 def save_ybjy_feedback(project_id, target_sample_id, query_type, query_value, feedback_value):
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     with open_yangben_yujian_db() as connection:
@@ -176,3 +214,70 @@ def list_ybjy_feedback_by_project(project_id):
             (project_id,)
         )
         return cursor.fetchall()
+
+
+def save_ybjy_feature_experiment(project_id, experiment_payload):
+    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open_yangben_yujian_db() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            '''
+            INSERT INTO ybjy_feature_experiment(
+                project_id,
+                experiment_name,
+                queue_size,
+                projection_dim,
+                epoch_count,
+                learning_rate,
+                temperature_value,
+                sample_count,
+                final_loss,
+                device_name,
+                status_text,
+                metric_json,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (
+                project_id,
+                experiment_payload['experiment_name'],
+                experiment_payload['queue_size'],
+                experiment_payload['projection_dim'],
+                experiment_payload['epoch_count'],
+                experiment_payload['learning_rate'],
+                experiment_payload['temperature_value'],
+                experiment_payload['sample_count'],
+                experiment_payload['final_loss'],
+                experiment_payload['device_name'],
+                experiment_payload['status_text'],
+                json.dumps(experiment_payload['metric_rows'], ensure_ascii=False),
+                current_time,
+            )
+        )
+        return cursor.lastrowid
+
+
+def list_ybjy_feature_experiments_by_project(project_id):
+    with open_yangben_yujian_db() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            '''
+            SELECT *
+            FROM ybjy_feature_experiment
+            WHERE project_id = ?
+            ORDER BY id DESC
+            ''',
+            (project_id,)
+        )
+        return cursor.fetchall()
+
+
+def get_ybjy_feature_experiment(experiment_id):
+    with open_yangben_yujian_db() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            'SELECT * FROM ybjy_feature_experiment WHERE id = ?',
+            (experiment_id,)
+        )
+        return cursor.fetchone()

@@ -11,6 +11,7 @@
             <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_project_detail', project_id=project_info.id) }}">返回项目</a>
             <a class="btn btn-outline-primary" href="{{ url_for('ybjy_project_report', project_id=project_info.id) }}">项目概览</a>
             <a class="btn btn-outline-primary" href="{{ url_for('ybjy_sample_inspection', project_id=project_info.id) }}">样本检查</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_representation_lab', project_id=project_info.id) }}">图像特征分析</a>
             <a class="btn btn-outline-primary" href="{{ url_for('ybjy_function_description', project_id=project_info.id) }}">主功能说明</a>
         </div>
     </div>
@@ -57,6 +58,12 @@
             <div class="ybjy-panel-title">样本检查清单</div>
             <p class="ybjy-panel-note">导出图片尺寸、文件大小、格式、特征长度和状态信息。</p>
             <a class="btn btn-primary w-100" href="{{ url_for('ybjy_export_sample_inspection', project_id=project_info.id) }}">生成 CSV 文件</a>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">图像特征训练记录</div>
+            <p class="ybjy-panel-note">导出相似关系分析和小型对比训练记录。</p>
+            <a class="btn btn-primary w-100" href="{{ url_for('ybjy_export_representation_experiments', project_id=project_info.id) }}">生成 CSV 文件</a>
         </section>
     </div>
 </section>

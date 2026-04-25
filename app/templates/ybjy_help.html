@@ -4,8 +4,8 @@
     <div class="ybjy-page-heading">
         <div>
             <p class="ybjy-eyebrow">使用说明</p>
-            <h1>样本语检系统操作流程</h1>
-            <p class="ybjy-heading-note">本页面说明系统主要功能、推荐操作顺序和常见检查点。</p>
+            <h1>图像表征训练与检索流程</h1>
+            <p class="ybjy-heading-note">本页面说明系统主要功能、推荐操作顺序、训练流程和常见检查点。</p>
         </div>
         <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_home') }}">返回首页</a>
     </div>
@@ -89,6 +89,27 @@
                 <li>导出内容与当前项目绑定，不会混入其他项目数据。</li>
                 <li>导出前建议先完成样本检查，减少无效记录。</li>
             </ul>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">九、图像特征分析</div>
+            <p class="ybjy-panel-note">图像特征分析页面用于查看图片之间的相似关系，并保存小型对比训练记录。</p>
+            <ul class="ybjy-help-list">
+                <li>该页面使用已导入图片的冻结视觉特征。</li>
+                <li>训练对象是小型特征压缩层，主干特征提取模型不参与训练。</li>
+                <li>实验记录可导出为 CSV，用于后续整理和复核。</li>
+            </ul>
+        </section>
+
+        <section class="ybjy-panel ybjy-moco-card">
+            <div class="ybjy-panel-title">十、MoCo 图像重排</div>
+            <p class="ybjy-panel-note">图片检索会同时参考两组信息：CLIP 看图片表达的内容，MoCo 看图片特征之间的接近程度。</p>
+            <div class="ybjy-moco-flow">
+                <span>选一张图</span>
+                <span>计算图像特征</span>
+                <span>合并排序</span>
+            </div>
+            <p class="ybjy-panel-note mb-0">结果里的“语义参考”和“图像参考”分别对应这两条线索，适合演示同类图片查找、近似图片整理和样本库复核。</p>
         </section>
     </div>
 </section>

@@ -5,7 +5,7 @@
         <div>
             <p class="ybjy-eyebrow">图片检索图片</p>
             <h1>{{ project_info.project_name }}</h1>
-            <p class="ybjy-heading-note">选择一张已导入图片，查找同项目内相似样本。</p>
+            <p class="ybjy-heading-note">选择一张图片，系统会优先推荐外观和语义都接近的样本。</p>
         </div>
         <div class="ybjy-action-row">
             <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_project_detail', project_id=project_info.id) }}">返回项目</a>
@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <section class="ybjy-panel">
+    <section class="ybjy-panel ybjy-search-panel">
         <form method="post" class="ybjy-search-form">
             <div>
                 <label class="form-label">查询图片</label>
@@ -30,6 +30,21 @@
             </div>
             <button class="btn btn-primary" type="submit">开始检索</button>
         </form>
+        <div class="ybjy-moco-tool">
+            <div>
+                <strong>图片参考</strong>
+                <span>先看画面内容，再看图像表征是否接近。</span>
+            </div>
+            <div>
+                <strong>MoCo 重排</strong>
+                <span>把更像同类样本的图片排到前面。</span>
+            </div>
+            <div>
+                <strong>人工复核</strong>
+                <span>保留或降低结果后，同一查询会记住这次判断。</span>
+            </div>
+        </div>
+        <p class="ybjy-score-help">推荐指数越高，越适合优先查看；综合相似度用于排序，语义参考来自 CLIP，图像参考来自 MoCo 投影特征。</p>
     </section>
 
     <div class="ybjy-result-grid">
@@ -38,9 +53,15 @@
             <img class="ybjy-thumb" src="{{ url_for('ybjy_uploaded_file', relative_path=row.relative_path) }}" alt="{{ row.file_name }}">
             <div class="ybjy-result-body">
                 <h3 title="{{ row.file_name }}">{{ row.file_name }}</h3>
-                <div class="ybjy-score-row"><span>原始分数</span><strong>{{ row.raw_score }}</strong></div>
-                <div class="ybjy-score-row"><span>校正分值</span><strong>{{ row.feedback_bonus }}</strong></div>
-                <div class="ybjy-score-row"><span>最终分数</span><strong>{{ row.final_score }}</strong></div>
+                <div class="ybjy-match-pill">{{ row.match_text }}</div>
+                <div class="ybjy-score-row"><span>推荐指数</span><strong>{{ row.display_score }}%</strong></div>
+                <div class="ybjy-score-row"><span>综合相似度</span><strong>{{ row.raw_score }}</strong></div>
+                {% if row.moco_score != '' %}
+                <div class="ybjy-score-row"><span>语义参考</span><strong>{{ row.clip_score }}</strong></div>
+                <div class="ybjy-score-row"><span>图像参考</span><strong>{{ row.moco_score }}</strong></div>
+                {% endif %}
+                <div class="ybjy-score-row"><span>人工调整</span><strong>{{ row.feedback_bonus }}</strong></div>
+                <div class="ybjy-score-row"><span>综合排序</span><strong>{{ row.final_display_score }}%</strong></div>
                 <div class="ybjy-feedback-row">
                     <form method="post" action="{{ url_for('ybjy_feedback_save', project_id=project_info.id) }}">
                         <input type="hidden" name="target_sample_id" value="{{ row.id }}">

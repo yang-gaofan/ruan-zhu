@@ -18,6 +18,40 @@ os.environ.setdefault('REQUESTS_CA_BUNDLE', certifi.where())
 import open_clip
 
 
+YBJY_TEXT_ALIASES = {
+    '人': ['person', 'human being'],
+    '男人': ['man', 'male person'],
+    '女人': ['woman', 'female person'],
+    '戴眼镜的人': ['person wearing glasses', 'a person with glasses', 'a woman wearing glasses', 'a man wearing glasses'],
+    '戴眼镜的女人': ['woman wearing glasses', 'female person with glasses'],
+    '戴眼镜的男人': ['man wearing glasses', 'male person with glasses'],
+    '狗': ['dog'],
+    '小狗': ['dog', 'puppy'],
+    '黄狗': ['yellow dog', 'golden retriever', 'Labrador retriever', 'light brown dog'],
+    '黄色的狗': ['yellow dog', 'golden retriever', 'Labrador retriever', 'light brown dog'],
+    '金色的狗': ['golden retriever', 'yellow dog', 'light brown dog'],
+    '黑狗': ['black dog', 'black Labrador', 'dark dog'],
+    '白狗': ['white dog', 'white puppy', 'samoyed'],
+    '棕色的狗': ['brown dog', 'golden retriever', 'Labrador retriever'],
+    '趴着的狗': ['dog lying down', 'lying dog', 'dog resting on the ground'],
+    '躺着的狗': ['dog lying down', 'lying dog', 'dog resting'],
+    '坐着的狗': ['sitting dog', 'dog sitting'],
+    '奔跑的狗': ['running dog', 'dog running'],
+    '猫': ['cat'],
+    '小猫': ['cat', 'kitten'],
+    '趴着的猫': ['cat lying down', 'lying cat', 'cat resting'],
+    '鸟': ['bird'],
+    '青蛙': ['frog'],
+    '马': ['horse'],
+    '飞机': ['airplane', 'airliner'],
+    '汽车': ['car', 'automobile'],
+    '跑车': ['sports car'],
+    '卡车': ['truck', 'trailer truck'],
+    '船': ['ship', 'boat'],
+    '帆船': ['sailboat', 'schooner'],
+}
+
+
 class FrozenYbjyClipService:
     def __init__(self):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -53,10 +87,29 @@ class FrozenYbjyClipService:
         return self._normalize_feature(feature_array)
 
     def encode_text_to_feature(self, text_value):
-        text_tokens = self.tokenizer([text_value]).to(self.device)
+        clean_text = text_value.strip()
+        text_values = [clean_text]
+        for key, alias_list in YBJY_TEXT_ALIASES.items():
+            if key in clean_text:
+                text_values.extend(alias_list)
+        text_values = list(dict.fromkeys([value for value in text_values if value]))
+        text_prompts = []
+        for value in text_values:
+            text_prompts.extend(
+                [
+                    value,
+                    f'a photo of a {value}',
+                    f'a clear photo of a {value}',
+                    f'a close-up photo of a {value}',
+                    f'a natural image of a {value}',
+                ]
+            )
+        text_tokens = self.tokenizer(text_prompts).to(self.device)
         with torch.no_grad():
             feature_tensor = self.model.encode_text(text_tokens)
-        feature_array = feature_tensor.squeeze(0).cpu().numpy()
+            feature_tensor = feature_tensor / feature_tensor.norm(dim=-1, keepdim=True)
+            feature_tensor = feature_tensor.mean(dim=0)
+        feature_array = feature_tensor.cpu().numpy()
         return self._normalize_feature(feature_array)
 
 

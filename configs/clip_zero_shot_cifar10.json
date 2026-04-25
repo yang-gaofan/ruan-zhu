@@ -1,0 +1,9 @@
+{
+  "dataset": "cifar10",
+  "data_root": "datasets",
+  "output_dir": "outputs/zero_shot_cifar10",
+  "batch_size": 128,
+  "workers": 4,
+  "sample_limit": 0,
+  "export_top_per_class": 3
+}

@@ -3,9 +3,9 @@
 <section class="ybjy-workbench">
     <div class="ybjy-page-heading">
         <div>
-            <p class="ybjy-eyebrow">项目管理</p>
-            <h1>图像样本项目</h1>
-            <p class="ybjy-heading-note">先建立项目，再导入图片样本并执行语义检索。</p>
+            <p class="ybjy-eyebrow">训练与检索</p>
+            <h1>图像表征项目</h1>
+            <p class="ybjy-heading-note">建立数据项目，导入图片样本，完成表征训练、语义检索、人工校正和结果归档。</p>
         </div>
         <div class="ybjy-status-grid">
             <div class="ybjy-status-tile">
@@ -19,6 +19,29 @@
         </div>
     </div>
 
+    <div class="ybjy-flow-strip">
+        <div class="ybjy-flow-item">
+            <span>01</span>
+            <strong>数据集</strong>
+            <p>CIFAR-10、STL-10 或本地图片样本</p>
+        </div>
+        <div class="ybjy-flow-item">
+            <span>02</span>
+            <strong>MoCo v2</strong>
+            <p>动量编码器、负样本队列、对比学习损失</p>
+        </div>
+        <div class="ybjy-flow-item">
+            <span>03</span>
+            <strong>表征检索</strong>
+            <p>文字检索图片、图片检索图片、排序校正</p>
+        </div>
+        <div class="ybjy-flow-item">
+            <span>04</span>
+            <strong>归档输出</strong>
+            <p>指标、检查点、清单和实验记录</p>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-lg-4">
             <section class="ybjy-panel">
@@ -26,14 +49,18 @@
                 <form method="post" action="{{ url_for('ybjy_project_create') }}" class="ybjy-form">
                     <div class="mb-3">
                         <label class="form-label">项目名称</label>
-                        <input type="text" class="form-control" name="project_name" placeholder="例如：细粒度鸟类图片整理" required>
+                        <input type="text" class="form-control" name="project_name" placeholder="例如：CIFAR-10 图像表征训练" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">项目备注</label>
-                        <textarea class="form-control" name="project_note" rows="5" placeholder="记录样本来源、用途或整理范围"></textarea>
+                        <textarea class="form-control" name="project_note" rows="5" placeholder="记录数据来源、训练用途、检索范围或复核要求"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">创建项目并进入</button>
                 </form>
+                <div class="ybjy-dataset-note">
+                    <strong>公开训练数据</strong>
+                    <span>CIFAR-10 用于监督类别图像表征分析，STL-10 用于无标签图像表征预训练。</span>
+                </div>
             </section>
         </div>
 
@@ -57,7 +84,12 @@
                             <span>样本 {{ row.sample_count }}</span>
                             <span>{{ row.created_at }}</span>
                         </div>
-                        <a class="btn btn-outline-primary w-100" href="{{ url_for('ybjy_project_detail', project_id=row.id) }}">进入项目</a>
+                        <div class="ybjy-project-actions">
+                            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_project_detail', project_id=row.id) }}">进入项目</a>
+                            <form method="post" action="{{ url_for('ybjy_project_delete', project_id=row.id) }}" data-ybjy-confirm="确认删除该项目及其样本、反馈和实验记录？">
+                                <button class="btn btn-outline-danger" type="submit">删除项目</button>
+                            </form>
+                        </div>
                     </article>
                 </div>
                 {% else %}

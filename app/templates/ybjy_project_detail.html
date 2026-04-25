@@ -11,6 +11,7 @@
             <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_home') }}">返回首页</a>
             <a class="btn btn-outline-primary" href="{{ url_for('ybjy_project_report', project_id=project_info.id) }}">项目概览</a>
             <a class="btn btn-outline-primary" href="{{ url_for('ybjy_sample_inspection', project_id=project_info.id) }}">样本检查</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('ybjy_representation_lab', project_id=project_info.id) }}">图像特征分析</a>
             <a class="btn btn-outline-primary" href="{{ url_for('ybjy_text_search', project_id=project_info.id) }}">文字检索</a>
             <a class="btn btn-outline-primary" href="{{ url_for('ybjy_image_search', project_id=project_info.id) }}">图片检索</a>
             <a class="btn btn-primary" href="{{ url_for('ybjy_export_center', project_id=project_info.id) }}">导出中心</a>

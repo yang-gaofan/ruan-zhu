@@ -1,0 +1,130 @@
+{% extends 'ybjy_base.html' %}
+{% block body %}
+<section class="ybjy-workbench">
+    <div class="ybjy-page-heading">
+        <div>
+            <p class="ybjy-eyebrow">特征看板</p>
+            <h1>{{ project_info.project_name }}</h1>
+            <p class="ybjy-heading-note">查看样本特征、近邻关系，并记录一次 MoCo 风格的对比训练过程。</p>
+        </div>
+        <div class="ybjy-action-row">
+            <a class="btn btn-outline-secondary" href="{{ url_for('ybjy_project_detail', project_id=project_info.id) }}">返回项目</a>
+            <a class="btn btn-primary" href="{{ url_for('ybjy_export_representation_experiments', project_id=project_info.id) }}">导出记录</a>
+        </div>
+    </div>
+
+    <section class="ybjy-lab-guide ybjy-lab-steps">
+        <div><span>01</span><strong>样本入库</strong><em>图片已转为特征向量</em></div>
+        <div><span>02</span><strong>近邻分析</strong><em>查看哪些图片更接近</em></div>
+        <div><span>03</span><strong>MoCo 记录</strong><em>运行一次对比学习实验</em></div>
+    </section>
+
+    <section class="ybjy-panel ybjy-moco-board">
+        <div>
+            <div class="ybjy-panel-title">MoCo 样本整理</div>
+            <p class="ybjy-panel-note mb-0">这里不改动原始图片。系统会把同一批图片做两次增强，训练一个小型投影层，让相似图片在特征空间里更容易靠近。</p>
+        </div>
+        <div class="ybjy-moco-flow">
+            <span>两次增强</span>
+            <span>正负样本比较</span>
+            <span>保存训练记录</span>
+        </div>
+    </section>
+
+    <div class="ybjy-lab-grid">
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">样本概况</div>
+            <p class="ybjy-panel-note">当前项目中可参与检索和分析的图片特征。</p>
+            <div class="ybjy-report-stat"><span>图片数量</span><strong>{{ queue_summary.sample_count }}</strong></div>
+            <div class="ybjy-report-stat"><span>向量长度</span><strong>{{ queue_summary.feature_dim }}</strong></div>
+            <div class="ybjy-report-stat"><span>分析容量</span><strong>{{ queue_summary.queue_size }}</strong></div>
+            <div class="ybjy-report-stat"><span>实际使用</span><strong>{{ queue_summary.used_queue_size }}</strong></div>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">相似关系概览</div>
+            <p class="ybjy-panel-note">快速查看样本库内部的整体聚合情况。</p>
+            <div class="ybjy-report-line"><span>整体接近程度</span><strong>{{ queue_summary.mean_similarity }}</strong></div>
+            <div class="ybjy-report-line"><span>最像的一组</span><strong>{{ queue_summary.max_similarity }}</strong></div>
+            <div class="ybjy-report-line"><span>差异最大的一组</span><strong>{{ queue_summary.min_similarity }}</strong></div>
+        </section>
+
+        <section class="ybjy-panel">
+            <div class="ybjy-panel-title">对比训练记录</div>
+            <p class="ybjy-panel-note">基于当前特征运行一次轻量训练，用于记录训练过程。</p>
+            <form method="post" class="ybjy-lab-form">
+                <label class="form-label">记录名称</label>
+                <input class="form-control" name="experiment_name" value="图像特征训练记录">
+                <label class="form-label">分析容量</label>
+                <input class="form-control" name="queue_size" type="number" min="2" max="4096" value="{{ queue_size }}">
+                <label class="form-label">特征压缩维度</label>
+                <input class="form-control" name="projection_dim" type="number" min="16" max="1024" value="128">
+                <label class="form-label">训练轮次</label>
+                <input class="form-control" name="epoch_count" type="number" min="1" max="100" value="12">
+                <label class="form-label">学习率</label>
+                <input class="form-control" name="learning_rate" type="number" step="0.0001" min="0.00001" max="0.1" value="0.001">
+                <label class="form-label">区分强度</label>
+                <input class="form-control" name="temperature_value" type="number" step="0.01" min="0.03" max="1" value="0.2">
+                <label class="form-label">增强幅度</label>
+                <input class="form-control" name="noise_scale" type="number" step="0.01" min="0" max="0.2" value="0.03">
+                <button class="btn btn-primary w-100 mt-3" type="submit">开始训练并保存记录</button>
+            </form>
+        </section>
+    </div>
+
+    <section class="ybjy-panel mt-3">
+        <div class="ybjy-panel-title">近邻列表</div>
+        <p class="ybjy-panel-note">左侧图片在样本库中最接近右侧图片。</p>
+        <div class="ybjy-table-wrap">
+            <table class="table ybjy-data-table">
+                <thead>
+                <tr>
+                    <th>样本文件</th>
+                    <th>最接近的图片</th>
+                    <th>接近程度</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in queue_summary.candidate_rows %}
+                <tr>
+                    <td>{{ row.file_name }}</td>
+                    <td>{{ row.nearest_name }}</td>
+                    <td>{{ row.nearest_score }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">当前项目暂无可用特征。</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="ybjy-panel mt-3">
+        <div class="ybjy-panel-title">训练记录</div>
+        <div class="ybjy-experiment-list">
+            {% for row in experiment_rows %}
+            <article class="ybjy-experiment-item">
+                <div>
+                    <h3>{{ row.experiment_name }}</h3>
+                    <p>{{ row.created_at }} · {{ row.device_name }} · {{ row.status_text }}</p>
+                </div>
+                <div class="ybjy-experiment-meta">
+                    <span>样本 {{ row.sample_count }}</span>
+                    <span>图片 {{ row.queue_size }}</span>
+                    <span>维度 {{ row.projection_dim }}</span>
+                    <span>轮次 {{ row.epoch_count }}</span>
+                    <span>损失 {{ row.final_loss }}</span>
+                </div>
+            </article>
+            {% else %}
+            <div class="ybjy-empty">
+                <strong>暂无训练记录</strong>
+                <span>导入图片后，可以在右上方运行一次小型对比训练。</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</section>
+{% endblock %}

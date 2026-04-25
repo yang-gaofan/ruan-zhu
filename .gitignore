@@ -8,5 +8,9 @@ runtime_data/database/*.db-journal
 runtime_data/exports/
 runtime_data/uploads/
 runtime_data/cache/
+datasets/
+outputs/
+checkpoints/
+.tools/
 .venv/
 .pytest_cache/
