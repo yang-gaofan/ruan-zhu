@@ -48,7 +48,8 @@
                 <img class="ybjy-thumb" src="{{ url_for('ybjy_uploaded_file', relative_path=row.relative_path) }}" alt="{{ row.file_name }}">
             <div class="ybjy-result-body">
                 <h3 title="{{ row.file_name }}">{{ row.file_name }}</h3>
-                <div class="ybjy-match-pill">{{ row.match_text }}</div>
+                <div class="ybjy-match-pill ybjy-match-{{ row.match_level }}">{{ row.match_text }}</div>
+                <div class="ybjy-score-meter"><span style="width: {{ row.final_display_score }}%"></span></div>
                 <div class="ybjy-score-row"><span>推荐指数</span><strong>{{ row.display_score }}%</strong></div>
                 <div class="ybjy-score-row"><span>模型相似度</span><strong>{{ row.raw_score }}</strong></div>
                 <div class="ybjy-score-row"><span>人工调整</span><strong>{{ row.feedback_bonus }}</strong></div>

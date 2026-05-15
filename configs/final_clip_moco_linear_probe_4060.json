@@ -1,0 +1,16 @@
+{
+  "dataset": "cifar10",
+  "data_root": "datasets/cifar10_eval",
+  "output_dir": "outputs/final_clip_moco_linear_probe",
+  "feature_source": "moco",
+  "moco_checkpoint": "outputs/final_clip_moco_pretrain/moco_v2_last.pt",
+  "epochs": 60,
+  "batch_size": 512,
+  "workers": 0,
+  "learning_rate": 0.002,
+  "weight_decay": 0.0001,
+  "sample_limit": 0,
+  "test_limit": 0,
+  "amp": true,
+  "no_download": true
+}

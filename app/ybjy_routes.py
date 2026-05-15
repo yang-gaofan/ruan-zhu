@@ -24,6 +24,7 @@ from app.ybjy_database import (
     list_ybjy_samples_by_project,
     save_ybjy_feedback,
     save_ybjy_sample,
+    update_ybjy_project,
 )
 from app.ybjy_project_service import (
     build_ybjy_operation_checklist,
@@ -94,6 +95,21 @@ def register_yangben_yujian_routes(app):
         project_id = create_ybjy_project(project_name, project_note)
         flash('项目创建成功，可以开始导入图片样本。')
         return redirect(url_for('ybjy_project_detail', project_id=project_id))
+
+    @app.route('/project/<int:project_id>/update', methods=['POST'])
+    def ybjy_project_update(project_id):
+        project_info = get_ybjy_project(project_id)
+        if not project_info:
+            flash('项目不存在。')
+            return redirect(url_for('ybjy_home'))
+        project_name = request.form.get('project_name', '').strip()
+        project_note = request.form.get('project_note', '').strip()
+        if not project_name:
+            flash('项目名称不能为空。')
+            return redirect(url_for('ybjy_home'))
+        update_ybjy_project(project_id, project_name, project_note)
+        flash('项目信息已更新。')
+        return redirect(url_for('ybjy_home'))
 
     @app.route('/project/<int:project_id>/delete', methods=['POST'])
     def ybjy_project_delete(project_id):

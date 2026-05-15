@@ -310,13 +310,38 @@ img {
 }
 
 .ybjy-project-main h3 {
-    margin: 0 0 8px;
+    margin: 0;
     overflow: hidden;
     color: var(--ybjy-text);
     font-size: 18px;
     font-weight: 700;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.ybjy-project-title-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ybjy-project-title-row .btn {
+    min-width: 82px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: var(--ybjy-primary);
+    background: var(--ybjy-primary-soft);
+    border-color: #cde4dc;
+    font-weight: 700;
+}
+
+.ybjy-project-title-row .btn:hover,
+.ybjy-project-title-row .btn:focus {
+    color: #ffffff;
+    background: var(--ybjy-primary);
+    border-color: var(--ybjy-primary);
 }
 
 .ybjy-project-main p {
@@ -344,6 +369,39 @@ img {
     border: 1px solid var(--ybjy-line);
     border-radius: 6px;
     font-size: 12px;
+}
+
+.ybjy-project-edit {
+    padding: 14px;
+    background: linear-gradient(180deg, #f8fbfa, #ffffff);
+    border: 1px solid var(--ybjy-line);
+    border-radius: 6px;
+}
+
+.ybjy-project-edit .form-label {
+    margin: 8px 0 5px;
+    color: var(--ybjy-muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ybjy-project-edit .form-label:first-child {
+    margin-top: 0;
+}
+
+.ybjy-project-edit textarea {
+    resize: vertical;
+}
+
+.ybjy-project-edit-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.ybjy-project-edit-actions .btn {
+    width: 100%;
 }
 
 .ybjy-project-actions {
@@ -1129,6 +1187,47 @@ img {
     color: #0f584b;
     background: #e7f5ef;
     border-color: #bddfd3;
+}
+
+.ybjy-match-strong {
+    color: #ffffff;
+    background: #11845b;
+    border-color: #11845b;
+}
+
+.ybjy-match-good {
+    color: #0b5e55;
+    background: #dff6ed;
+    border-color: #9ed9c8;
+}
+
+.ybjy-match-weak {
+    color: #725200;
+    background: #fff1bf;
+    border-color: #e9ca68;
+}
+
+.ybjy-match-bad {
+    color: #a31f32;
+    background: #ffe5e9;
+    border-color: #f4a9b4;
+}
+
+.ybjy-score-meter {
+    overflow: hidden;
+    height: 8px;
+    margin: 0 0 10px;
+    background: #edf2f0;
+    border: 1px solid #d7e2de;
+    border-radius: 6px;
+}
+
+.ybjy-score-meter span {
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    background: linear-gradient(90deg, #11845b, #34a77a);
+    border-radius: 6px;
 }
 
 .ybjy-score-row:last-of-type {

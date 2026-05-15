@@ -11,18 +11,15 @@ import torch.nn.functional as functional
 
 from ybjy_config import ALLOWED_IMAGE_EXTENSIONS, APP_SHORT_NAME, APP_TITLE, BASE_DIR, EXPORT_DIR
 from app.ybjy_database import list_ybjy_feedback_by_project, list_ybjy_samples_by_project
-from deep_learning.moco_v2 import MocoProjectionHead
+from deep_learning.models.moco_v2 import MocoProjectionHead
 
-YBJY_MOCO_SHOWCASE_CHECKPOINT_PATH = BASE_DIR / 'outputs' / 'clip_moco_showcase_train' / 'moco_v2_last.pt'
-YBJY_MOCO_FALLBACK_CHECKPOINT_PATH = BASE_DIR / 'outputs' / 'clip_moco_cifar10_train' / 'moco_v2_last.pt'
+YBJY_MOCO_CHECKPOINT_PATH = BASE_DIR / 'outputs' / 'final_clip_moco_pretrain' / 'moco_v2_last.pt'
 _YBJY_MOCO_PROJECTOR = None
 _YBJY_MOCO_PROJECTOR_READY = None
 
 
 def _resolve_ybjy_moco_checkpoint_path():
-    if YBJY_MOCO_SHOWCASE_CHECKPOINT_PATH.exists():
-        return YBJY_MOCO_SHOWCASE_CHECKPOINT_PATH
-    return YBJY_MOCO_FALLBACK_CHECKPOINT_PATH
+    return YBJY_MOCO_CHECKPOINT_PATH
 
 
 def is_allowed_ybjy_image(file_name):
@@ -88,7 +85,8 @@ def _load_ybjy_moco_projector(input_dim):
         _YBJY_MOCO_PROJECTOR_READY = True
         return _YBJY_MOCO_PROJECTOR
     except Exception:
-        _YBJY_MOCO_PROJECTOR_READY = False
+        _YBJY_MOCO_PROJECTOR = None
+        _YBJY_MOCO_PROJECTOR_READY = None
         return None
 
 
@@ -126,7 +124,9 @@ def apply_ybjy_feedback_bonus(project_id, query_type, query_value, result_list):
             current_bonus = 0.15 if feedback_map[item['id']] == 1 else -0.15
         item['feedback_bonus'] = current_bonus
         item['final_score'] = round(item['raw_score'] + current_bonus, 6)
-        item['final_display_score'] = round(min(100.0, max(0.0, item.get('display_score', 0.0) + current_bonus * 100)), 2)
+        item['final_display_score'] = round(min(100.0, max(0.0, item.get('display_score', 0.0) + current_bonus * 80)), 2)
+        item['match_text'] = build_ybjy_match_text(item['final_display_score'])
+        item['match_level'] = build_ybjy_match_level(item['final_display_score'])
         reranked_list.append(item)
 
     reranked_list.sort(key=lambda row: row['final_score'], reverse=True)
@@ -213,27 +213,69 @@ def attach_ybjy_display_scores(result_list, score_mode):
     for row in result_list:
         raw_score = row['raw_score']
         if score_mode == 'text':
-            display_value = (raw_score - 0.18) / 0.14 * 100
+            display_value = build_ybjy_text_display_score(raw_score)
         else:
-            if score_span <= 1e-8:
-                display_value = 55.0 if raw_score >= 0.2 else 20.0
-            else:
-                score_ratio = (raw_score - min_score) / score_span
-                rank_ratio = 1.0 - rank_map[id(row)] / total_count
-                absolute_ratio = (raw_score - 0.2) / 0.35
-                display_value = (score_ratio * 0.35 + rank_ratio * 0.25 + absolute_ratio * 0.4) * 100
+            display_value = build_ybjy_image_display_score(
+                raw_score,
+                min_score,
+                max_score,
+                rank_map[id(row)],
+                total_count,
+                score_span,
+            )
         row['display_score'] = round(min(100.0, max(0.0, display_value)), 2)
-        if score_mode == 'text' and raw_score < 0.235:
-            row['match_text'] = '不相关'
-        elif row['display_score'] >= 88:
-            row['match_text'] = '强相关'
-        elif row['display_score'] >= 72:
-            row['match_text'] = '相关'
-        elif row['display_score'] >= 45:
-            row['match_text'] = '弱相关'
-        else:
-            row['match_text'] = '不相关'
+        row['final_display_score'] = row['display_score']
+        row['match_text'] = build_ybjy_match_text(row['display_score'])
+        row['match_level'] = build_ybjy_match_level(row['display_score'])
     return result_list
+
+
+def build_ybjy_text_display_score(raw_score):
+    if raw_score >= 0.335:
+        return 96.0 + min(4.0, (raw_score - 0.335) / 0.045 * 4.0)
+    if raw_score >= 0.30:
+        return 88.0 + (raw_score - 0.30) / 0.035 * 8.0
+    if raw_score >= 0.265:
+        return 72.0 + (raw_score - 0.265) / 0.035 * 16.0
+    if raw_score >= 0.235:
+        return 45.0 + (raw_score - 0.235) / 0.03 * 27.0
+    if raw_score >= 0.205:
+        return 18.0 + (raw_score - 0.205) / 0.03 * 22.0
+    return max(0.0, raw_score / 0.205 * 18.0)
+
+
+def build_ybjy_image_display_score(raw_score, min_score, max_score, rank_index, total_count, score_span):
+    if score_span <= 1e-8:
+        return 82.0 if raw_score >= 0.45 else 35.0
+    score_ratio = (raw_score - min_score) / score_span
+    rank_ratio = 1.0 - rank_index / total_count
+    absolute_ratio = (raw_score - 0.18) / 0.42
+    mixed_score = score_ratio * 0.5 + rank_ratio * 0.3 + absolute_ratio * 0.2
+    if rank_index == 0 and raw_score >= 0.35:
+        return max(92.0, mixed_score * 100)
+    if rank_index <= 2 and raw_score >= 0.30:
+        return max(82.0, mixed_score * 100)
+    return mixed_score * 100
+
+
+def build_ybjy_match_text(display_score):
+    if display_score >= 88:
+        return '强相关'
+    if display_score >= 72:
+        return '相关'
+    if display_score >= 45:
+        return '弱相关'
+    return '不相关'
+
+
+def build_ybjy_match_level(display_score):
+    if display_score >= 88:
+        return 'strong'
+    if display_score >= 72:
+        return 'good'
+    if display_score >= 45:
+        return 'weak'
+    return 'bad'
 
 
 def export_ybjy_project_csv(project_info, search_rows, export_type):

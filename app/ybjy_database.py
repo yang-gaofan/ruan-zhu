@@ -101,6 +101,23 @@ def create_ybjy_project(project_name, project_note):
         return cursor.lastrowid
 
 
+def update_ybjy_project(project_id, project_name, project_note):
+    current_project = get_ybjy_project(project_id)
+    if not current_project:
+        return False
+    with open_yangben_yujian_db() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            '''
+            UPDATE ybjy_project
+            SET project_name = ?, project_note = ?
+            WHERE id = ?
+            ''',
+            (project_name.strip(), project_note.strip(), project_id)
+        )
+    return True
+
+
 def list_ybjy_projects():
     with open_yangben_yujian_db() as connection:
         cursor = connection.cursor()

@@ -5,8 +5,7 @@
 主要入口：
 
 1. Web 系统：`python app.py`
-2. 展示图片训练：`python -m deep_learning.train_moco --config configs/clip_moco_showcase_train.json`
-3. CIFAR-10 训练：`python -m deep_learning.train_moco --config configs/clip_moco_cifar10_train.json --no-download`
-4. 零样本评估：`python -m deep_learning.evaluate_zero_shot --config configs/clip_zero_shot_cifar10.json`
-5. 当前 MoCo 检查点：`outputs/clip_moco_showcase_train/moco_v2_last.pt`
-6. 评估结果：`outputs/zero_shot_cifar10`
+2. MoCo 预训练：`python -m deep_learning.training.train_moco --config configs/final_clip_moco_pretrain_4060.json`
+3. 最终分类评估：`python -m deep_learning.evaluation.linear_probe --config configs/final_clip_moco_linear_probe_4060.json --no-download`
+4. 当前 MoCo 检查点：`outputs/final_clip_moco_pretrain/moco_v2_last.pt`
+5. 评估结果：`outputs/final_clip_moco_linear_probe`

@@ -77,12 +77,28 @@
                 <div class="col-md-6">
                     <article class="ybjy-project-item">
                         <div class="ybjy-project-main">
-                            <h3 title="{{ row.project_name }}">{{ row.project_name }}</h3>
+                            <div class="ybjy-project-title-row">
+                                <h3 title="{{ row.project_name }}">{{ row.project_name }}</h3>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#ybjyProjectEdit{{ row.id }}" aria-expanded="false" aria-controls="ybjyProjectEdit{{ row.id }}">编辑信息</button>
+                            </div>
                             <p>{{ row.project_note or '暂无项目备注' }}</p>
                         </div>
                         <div class="ybjy-project-meta">
                             <span>样本 {{ row.sample_count }}</span>
                             <span>{{ row.created_at }}</span>
+                            <span>编号 {{ row.id }}</span>
+                        </div>
+                        <div class="collapse ybjy-project-edit" id="ybjyProjectEdit{{ row.id }}">
+                            <form method="post" action="{{ url_for('ybjy_project_update', project_id=row.id) }}">
+                                <label class="form-label">项目名称</label>
+                                <input class="form-control" name="project_name" value="{{ row.project_name }}" maxlength="80" required>
+                                <label class="form-label">项目备注</label>
+                                <textarea class="form-control" name="project_note" rows="4" maxlength="500" placeholder="记录数据来源、训练用途、检索范围或复核要求">{{ row.project_note }}</textarea>
+                                <div class="ybjy-project-edit-actions">
+                                    <button class="btn btn-primary" type="submit">保存修改</button>
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#ybjyProjectEdit{{ row.id }}">收起</button>
+                                </div>
+                            </form>
                         </div>
                         <div class="ybjy-project-actions">
                             <a class="btn btn-outline-primary" href="{{ url_for('ybjy_project_detail', project_id=row.id) }}">进入项目</a>
